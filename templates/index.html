@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add New Tank</title>
+  <link rel="stylesheet" href="../static/style.css">
+</head>
+
+<body>
+
+
+
+  <link href="https://fonts.googleapis.com/css?family=DM+Sans:400,500,700&display=swap" rel="stylesheet">
+  <div class="task-manager">
+    <div class="left-bar">
+      <div class="upper-part">
+        <div class="actions">
+
+          <div class="circle-2"></div> <!-- Upper left three dots-->
+        </div> <!-- actions -->
+      </div> <!-- upper-part -->
+    </div> <!-- left-bar -->
+
+
+    <div class="page-content">
+      <div class="header">Today Tasks</div>
+
+      <div class="content-categories">
+        <div class="label-wrapper">
+            <input class="nav-item" name="nav" type="radio" id="opt-1" {% if active_tab == 'opt-1' %}checked{% endif %} 
+                   onclick="updateTab('opt-1')">
+            <label class="category" for="opt-1">All</label>
+        </div>
+        <div class="label-wrapper">
+            <input class="nav-item" name="nav" type="radio" id="opt-2" {% if active_tab == 'opt-2' %}checked{% endif %}
+                   onclick="updateTab('opt-2')">
+            <label class="category" for="opt-2">Reminders</label>
+        </div>
+        <div class="label-wrapper">
+            <input class="nav-item" name="nav" type="radio" id="opt-3" {% if active_tab == 'opt-3' %}checked{% endif %}
+                   onclick="updateTab('opt-3')">
+            <label class="category" for="opt-3">Species</label>
+        </div>
+        <div class="label-wrapper">
+            <input class="nav-item" name="nav" type="radio" id="opt-4" {% if active_tab == 'opt-4' %}checked{% endif %}
+                   onclick="updateTab('opt-4')">
+            <label class="category" for="opt-4">Tanks</label>
+        </div>
+    </div> <!-- content categories -->
+
+      
+      <div class="tasks-wrapper">
+
+        <div class="task" data-category="all my-reminder">
+         
+        <div class="label-reminder">
+          <button class="dropdown-button" onclick="toggleForm()">Create a Reminder</button>
+          </div>
+        <!-- Add data-category attributes to each task -->
+       <div>
+          <div id="reminderForm" class="dropdown-content" style="display: none;">
+            <form action="/add_reminder" method="POST">
+              <label for="title">Title:</label>
+              <input title="title_input" type="text" name="title" required><br>
+              
+              <label for="tank_id">Select Tank:</label>
+              <select id="tank_id" name="tank_id" required>
+                {% for tank in tanks %}
+                  <option value="{{ tank.tank_id }}">{{ tank.tank_name }}</option>
+                {% endfor %}
+              </select>
+              
+              <label for="description">Description:</label>
+              <textarea title="desc_input" name="description"></textarea><br>
+              
+              <label for="due_date">Due Date:</label>
+              <input title="datetime_input" type="datetime-local" name="due_date" required><br>
+              
+              <label for="recurrence_type">Recurrence Type:</label>
+              <select title="reminder_type_input" name="recurrence_type">
+                <option value="none">None</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="biweekly">Biweekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="custom">Custom</option>
+              </select><br>
+              
+              <label for="recurrence_interval">Custom Recurrence Interval (days):</label>
+              <input title="recurrence_input" type="number" name="recurrence_interval"><br>
+              
+              <label for="priority">Priority (1-5):</label>
+              <input title="priority_input" type="number" name="priority" min="1" max="5" required><br>
+              
+              <label for="category">Category:</label>
+              <select title="category_input" name="category">
+                <option value="cleaning">Cleaning</option>
+                <option value="feeding">Feeding</option>
+                <option value="water_change">Water Change</option>
+                <option value="medication">Medication</option>
+                <option value="testing">Testing</option>
+                <option value="maintenance">Maintenance</option>
+                <option value="other">Other</option>
+              </select><br>
+              
+              <label for="status">Status:</label>
+              <select title="status_input" name="status">
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="snoozed">Snoozed</option>
+                <option value="cancelled">Cancelled</option>
+              </select><br>
+              
+              <label for="notification_time">Notification Time (minutes before due date):</label>
+              <input title="notif_time_input" type="number" name="notification_time"><br>
+              
+              <label for="assigned_to">Assigned To:</label>
+              <input title="assign_input" type="text" name="assigned_to"><br>
+              
+              <button type="submit">Create Reminder</button>
+            </form>
+          </div>
+        </div>
+        </div> <!-- all my-reminders -->
+        
+      
+        
+        <!-- End of reminders task -->
+
+
+        <!-- Species task section ///  Species task section ///  Species task section ///  Species task section  -->
+        <!-- Start of Fish search function-->
+       <div class="task" data-category="species">
+        <div class="search-wrapper">
+          <form method="POST" class="search-box">
+            <input type="text" name="search" placeholder="Search Genus, Species, or FBname">
+        
+            <button type="submit" name="action" value="search">Search</button>
+            <button type="submit" name="action" value="clear">Clear</button>
+          </form>
+          {% if searched %}
+            {% if results %}
+              <div class="results">
+                {% for fish in results %}
+                  <div class="result">
+                    {% if fish['image_url'] %}
+                      <div class="fish-image">
+                        <img src="{{ fish['image_url'] }}" alt="{{ fish['Genus'] }} {{ fish['Species'] }}">
+                      </div>
+                    {% endif %}
+                    <div class="fish-details">
+                      <strong>Genus:</strong> {{ fish['Genus'] }}<br>
+                      <strong>Species:</strong> {{ fish['Species'] }}<br>
+                      <strong>Name:</strong> {{ fish['FBname'] or 'N/A' }}<br>
+                     
+                    </div>
+                  </div>
+                {% endfor %}
+              </div> <!-- result -->
+            {% else %}
+              <p>No results found.</p>
+            {% endif %}
+          {% endif %}
+        </div> <!-- search-wrapper -->
+</div> <!-- task species-->
+
+
+<!-- tanks section-->
+<div class="task" data-category="all tanks">
+  <!-- Toggle Button -->
+  <div class="label-tank">
+    <button id="toggle-tanks" class="toggle-button">
+      <span class="button-icon">+</span> Add a New Tank
+    </button>
+  </div>
+  <!-- Tank Form Content -->
+  <div id="tanks-content">
+    <form action="/add_tank" method="post" class="tank-form">
+      <div class="form-header">
+        <h2>New Tank Information</h2>
+        <p>Enter the details for your aquarium setup below</p>
+      </div>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="tank_name">Tank Name</label>
+          <input title="tank_input" type="text" id="tank_name" name="tank_name" placeholder="My Reef Tank" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="fish_amount">Fish Amount</label>
+          <input title="amount_input" type="number" id="fish_amount" name="fish_amount" placeholder="5" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="water_type">Water Type</label>
+          <select title="water_input" id="water_type" name="water_type" required>
+            <option value="" disabled selected>Select water type</option>
+            <option value="0">Freshwater</option>
+            <option value="1">Saltwater</option>
+            <option value="2">Brackish</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="water_amount_litre">Current Water (litres)</label>
+          <input title="water_amount_input" type="number" id="water_amount_litre" name="water_amount_litre" placeholder="75" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="tank_volume">Tank Volume (litres)</label>
+          <input title="tank_volume_input" type="number" id="tank_volume" name="tank_volume" placeholder="100" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="filter_type">Filter Type</label>
+          <input title="filter_type_input" type="text" id="filter_type" name="filter_type" placeholder="Canister filter" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="heater">Heater Included?</label>
+          <select title="heater_input" id="heater" name="heater" required>
+            <option value="" disabled selected>Select option</option>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="temp_c">Temperature (°C)</label>
+          <input title="temperature_input" type="number" id="temp_c" name="temp_c" placeholder="24" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="last_cleaned">Last Cleaned</label>
+          <input title="last_cleaned_input" type="datetime-local" id="last_cleaned" name="last_cleaned" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="cleaning_frequency_days">Cleaning Frequency (days)</label>
+          <input title="cleaning_frequency_input" type="number" id="cleaning_frequency_days" name="cleaning_frequency_days" placeholder="14" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="lighting">Lighting</label>
+          <input title="lighting_input" type="text" id="lighting" name="lighting" placeholder="LED Full Spectrum" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input title="location_input" type="text" id="location" name="location" placeholder="Living Room" required>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="submit-button">Save Tank</button>
+        <button type="reset" class="reset-button">Clear Form</button>
+      </div>
+    </form>
+  </div>
+  <!-- tanks-content-->
+
+  <!-- Link on one line -->
+  <div class="tanks-info">
+    <hr>
+    <div id="sub-table-desc">
+      <h2>
+       Add Notes to Table
+      </h2>
+
+    </div> <!-- sub-table-desc-->
+
+    <!-- Create mass table or detailed table section, buttons-->
+    <div class="wrapper">
+      <div class="buttonWrapper">
+        <button class="tab-button pill" data-id="mass-sect">Mass</button>
+        <button class="tab-button pill" data-id="detail-sect">Detailed</button>
+      </div> <!-- buttonWrapper  mass and detail buttons-->
+    
+      <div class="contentWrapper" id="content-wrapper">
+        <button class="close-content" id="close-content-btn" title="Close"></button>
+    
+        <div class="content" id="mass-sect">
+          <div class="search-box-mass">
+            <form method="POST">
+              <input type="text" name="search" placeholder="Search Genus, Species, or FBname">
+              <button type="submit" name="action" value="search">Search</button>
+              <button type="submit" name="action" value="clear">Clear</button>
+            </form>
+          </div>
+          <div id="search-results-container">
+            {% if searched %}
+            {% if results %}
+            <div class="result-mass">
+              {% for fish in results %}
+              <div class="result" data-speccode="{{ fish['SpecCode'] }}" data-genus="{{ fish['Genus'] }}"
+                data-species="{{ fish['Species'] }}" data-fbname="{{ fish['FBname'] or 'N/A' }}">
+                <button class="select-fish" style="all: unset; cursor: pointer; width: 100%;">
+                  <strong>Genus:</strong> {{ fish['Genus'] }}<br>
+                  <strong>Species:</strong> {{ fish['Species'] }}<br>
+                  <strong>FBname:</strong> {{ fish['FBname'] or 'N/A' }}<br>
+                  <strong>SpecCode:</strong> {{ fish['SpecCode'] }}<br>
+                  <strong>SpeciesRefNo:</strong> {{ fish['SpeciesRefNo'] or 'N/A' }}
+                </button>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p>No results found.</p>
+            {% endif %}
+            {% endif %}
+          </div>
+
+          <form id="mass-fish-form" action="/add_mass_fish" method="post">
+            <label for="mass_tank_id">Select Tank:</label>
+            <select id="mass_tank_id" name="tank_id" required>
+              {% for tank in tanks %}
+              <option value="{{ tank.tank_id }}">{{ tank.tank_name }}</option>
+              {% endfor %}
+            </select>
+          
+            <label for="mass_selected_species">Selected Species:</label>
+            <input type="text" id="mass_selected_species" name="selected_species" readonly>
+          
+            <label for="mass_fbname">FBname:</label>
+            <input type="text" id="mass_fbname" name="fbname" readonly>
+          
+            <input type="hidden" id="mass_SpecCode" name="SpecCode" required>
+          
+            <label for="notes_mass">Notes:</label>
+            <input type="text" id="notes_mass" name="notes_mass" required>
+          
+            <label for="mass_quantity">Quantity:</label>
+            <input type="number" id="mass_quantity" name="mass_quantity" required>
+          
+            <label for="mass_avg_age_months">Average Age (Months):</label>
+            <input type="number" id="mass_avg_age_months" name="avg_age_months" required>
+          
+            <button type="submit">Add</button>
+          </form>
+        </div> <!-- mass-sect -->
+
+        <!-- detail section and search // Detail section  // Detail section-->
+        <div class="content" id="detail-sect">
+          <div class="search-box-detail">
+            <form method="POST">
+              <input type="text" name="search" placeholder="Search Genus, Species, or FBname">
+
+              <button type="submit" name="action" value="search">Search</button>
+              <button type="submit" name="action" value="clear">Clear</button>
+            </form>
+          </div>
+          <div id="search-results-container">
+            {% if searched %}
+            {% if results %}
+            <div class="result-detail">
+              {% for fish in results %}
+              <div class="result" data-speccode="{{ fish['SpecCode'] }}" data-genus="{{ fish['Genus'] }}"
+                data-species="{{ fish['Species'] }}" data-fbname="{{ fish['FBname'] or 'N/A' }}">
+                <button class="select-fish-detail" style="all: unset; cursor: pointer; width: 100%;">
+                  <strong>Genus:</strong> {{ fish['Genus'] }}<br>
+                  <strong>Species:</strong> {{ fish['Species'] }}<br>
+                  <strong>FBname:</strong> {{ fish['FBname'] or 'N/A' }}<br>
+                  <strong>SpecCode:</strong> {{ fish['SpecCode'] }}<br>
+                  <strong>SpeciesRefNo:</strong> {{ fish['SpeciesRefNo'] or 'N/A' }}
+                </button>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p>No results found.</p>
+            {% endif %}
+            {% endif %}
+          </div> <!-- search-results-container -->
+
+          <form id="detail-fish-form" action="/add_detail_fish" method="post">
+            <label for="detail_tank_id">Select Tank:</label>
+            <select id="detail_tank_id" name="tank_id" required>
+              {% for tank in tanks %}
+              <option value="{{ tank.tank_id }}">{{ tank.tank_name }}</option>
+              {% endfor %}
+            </select>
+          
+            <label for="detail_selected_species">Selected Species:</label>
+            <input type="text" id="detail_selected_species" name="selected_species" readonly>
+          
+            <label for="detail_fbname">FBname:</label>
+            <input type="text" id="detail_fbname" name="fbname" readonly>
+          
+            <input type="hidden" id="detail_SpecCode" name="SpecCode" required>
+          
+            <label for="notes_detail">Notes:</label>
+            <input type="text" id="notes_detail" name="notes_detail" required>
+          
+            <label for="detail_avg_age_months">Average Age (Months):</label>
+            <input type="number" id="detail_avg_age_months" name="avg_age_months" required>
+          
+            <label for="date_added">Date Added:</label>
+            <input type="date" id="date_added" name="date_added" required>
+          
+            <label for="health_status">Health Status:</label>
+            <input type="text" id="health_status" name="health_status" required>
+          
+            <label for="behavior_notes">Behavior Notes:</label>
+            <input type="text" id="behavior_notes" name="behavior_notes">
+          
+            <label for="fish_name">Fish Name:</label>
+            <input type="text" id="fish_name" name="fish_name">
+          
+            <label for="fish_identifiers">Fish Identifiers:</label>
+            <input type="text" id="fish_identifiers" name="fish_identifiers">
+          
+            <button type="submit">Add</button>
+          </form>
+
+        </div> <!-- detail-sect -->
+
+      </div> <!-- contentWrapper -->
+
+    </div> <!-- wrapper -->
+    <!-- Create mass table or detailed table section, buttons-->
+
+
+    <!-- YOUR TANKS SECTION /// YOUR TANKS SECTION  ///   YOUR TANKS SECTION /// YOUR TANKS SECTION-->
+    {% if show_tanks %}
+    <div class="container mt-4">
+      <hr>
+      <div class="card">
+        <div class="card-header">
+          <h2>Your Tanks</h2>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            {% for tank in tanks %}
+            <div class="tank-card" id="tank-card-{{ tank.tank_id }}">
+              <h3>{{ tank.tank_name }}</h3>
+              <ul class="tank-details">
+                <li><strong>Fish Amount:</strong> {{ tank.fish_amount }}</li>
+                <li><strong>Water Type:</strong> {{ tank.water_type }}</li>
+                <li><strong>Water Amount (L):</strong> {{ tank.water_amount_litre }}</li>
+                <li><strong>Tank Volume:</strong> {{ tank.tank_volume }}</li>
+                <li><strong>Filter Type:</strong> {{ tank.filter_type }}</li>
+                <li><strong>Heater:</strong> {{ tank.heater }}</li>
+                <li><strong>Temperature (°C):</strong> {{ tank.temp_c }}</li>
+                <li><strong>Last Cleaned:</strong> {{ tank.last_cleaned }}</li>
+                <li><strong>Cleaning Frequency (days):</strong> {{ tank.cleaning_frequency_days }}</li>
+                <li><strong>Lighting:</strong> {{ tank.lighting }}</li>
+                <li><strong>Location:</strong> {{ tank.location }}</li>
+              </ul>
+
+              <!-- Dropdown section for additional notes -->
+              <label class="dropdown">
+                <div class="dd-button">
+                  Fish Data
+                </div>
+
+                <input type="checkbox" class="dd-input" id="tank-dropdown-{{ tank.tank_id }}">
+
+                <ul class="dd-menu">
+                  {% set mass_fish_found = false %}
+                  {% set detail_fish_found = false %}
+
+                  <!-- Check for mass_fish data -->
+                  {% for mass in mass_fish %}
+                  {% if mass.tank_id == tank.tank_id %}
+                  {% set mass_fish_found = true %}
+                  <li class="fish-data">
+                    <strong>Mass Fish Entry:</strong>
+                    <ul>
+                      <li>Species Code: {{ mass.SpecCode }}</li>
+                      <li>Notes: {{ mass.notes_mass }}</li>
+                      <li>Quantity: {{ mass.mass_quantity }}</li>
+                      <li>Average Age: {{ mass.avg_age_months }} months</li>
+                    </ul>
+                  </li>
+                  {% if not loop.last %}<li class="divider"></li>{% endif %}
+                  {% endif %}
+                  {% endfor %}
+
+                  <!-- Check for detail_fish data -->
+                  {% for detail in detail_fish %}
+                  {% if detail.tank_id == tank.tank_id %}
+                  {% set detail_fish_found = true %}
+                  <li class="fish-data">
+                    <strong>{{ detail.fish_name if detail.fish_name else 'Fish Details' }}</strong>
+                    <ul>
+                      <li>Species Code: {{ detail.SpecCode }}</li>
+                      <li>Notes: {{ detail.notes_detail }}</li>
+                      <li>Average Age: {{ detail.avg_age_months }} months</li>
+                      <li>Date Added: {{ detail.date_added }}</li>
+                      <li>Health Status: {{ detail.health_status }}</li>
+                      <li>Behavior Notes: {{ detail.behavior_notes }}</li>
+                      {% if detail.fish_identifiers %}<li>Identifiers: {{ detail.fish_identifiers }}</li>{% endif %}
+                    </ul>
+                  </li>
+                  {% if not loop.last %}<li class="divider"></li>{% endif %}
+                  {% endif %}
+                  {% endfor %}
+
+                  {% if not mass_fish_found and not detail_fish_found %}
+                  <li>No fish data or additional data available for this tank</li>
+                  {% endif %}
+                </ul>
+              </label>
+              <div class="mt-2">
+                <button type="button" class="btn btn-primary btn-sm edit-tank-btn" 
+                data-tank-id="{{ tank.tank_id }}" 
+                onclick="moveTankBehindBackground(event, this); positionModalOverTankCard(event, this)">Edit</button>
+              
+                <!-- delete tank form -->
+                <form action="/delete_tank/{{ tank.tank_id }}" method="post" class="delete-form mt-2"
+                  onsubmit="return confirm('Are you sure you want to delete this tank, its Fish Data, notes, reminders, and other connected information? ');">
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+              </div>
+            </div> <!-- tank-card -->
+            {% endfor %}
+          </div> <!-- table-responsive -->
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+   
+    <div class="modal fade" id="editTankModal" tabindex="-1" aria-labelledby="editTankModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content tank-card">
+          <div class="modal-header border-0 p-0">
+            <h3 id="editTankModalLabel">Edit Tank</h3>
+           
+          </div>
+          <div class="modal-body p-0">
+            <form id="editTankForm" method="post">
+              <input type="hidden" id="edit_tank_id" name="tank_id">
+              
+              <ul class="tank-details">
+                <li>
+                  <strong>Tank Name:</strong>
+                  <input type="text" class="form-control" id="edit_tank_name" name="tank_name" required>
+                </li>
+                <li>
+                  <strong>Fish Amount:</strong>
+                  <input type="number" class="form-control" id="edit_fish_amount" name="fish_amount">
+                </li>
+                <li>
+                  <strong>Water Type:</strong>
+                  <select class="form-select" id="edit_water_type" name="water_type">
+                    <option value="0">Freshwater</option>
+                    <option value="1">Saltwater</option>
+                    <option value="2">Brackish</option>
+                  </select>
+                </li>
+                <li>
+                  <strong>Water Amount (L):</strong>
+                  <input type="number" step="0.1" class="form-control" id="edit_water_amount_litre" name="water_amount_litre">
+                </li>
+                <li>
+                  <strong>Tank Volume:</strong>
+                  <input type="text" class="form-control" id="edit_tank_volume" name="tank_volume">
+                </li>
+                <li>
+                  <strong>Filter Type:</strong>
+                  <input type="text" class="form-control" id="edit_filter_type" name="filter_type">
+                </li>
+                <li>
+                  <strong>Heater:</strong>
+                  <input type="text" class="form-control" id="edit_heater" name="heater">
+                </li>
+                <li>
+                  <strong>Temperature (°C):</strong>
+                  <input type="number" step="0.1" class="form-control" id="edit_temp_c" name="temp_c">
+                </li>
+                <li>
+                  <strong>Last Cleaned:</strong>
+                  <input type="datetime-local" class="form-control" id="edit_last_cleaned" name="last_cleaned">
+                </li>
+                <li>
+                  <strong>Cleaning Frequency (days):</strong>
+                  <input type="number" class="form-control" id="edit_cleaning_frequency_days" name="cleaning_frequency_days">
+                </li>
+                <li>
+                  <strong>Lighting:</strong>
+                  <input type="text" class="form-control" id="edit_lighting" name="lighting">
+                </li>
+                <li>
+                  <strong>Location:</strong>
+                  <input type="text" class="form-control" id="edit_location" name="location">
+                </li>
+              </ul>
+              
+              <div class="mt-2">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- edit tank modal  //// modal-->
+
+  </div> <!-- tanks-info -->
+</div> <!-- task -->
+
+
+
+
+      </div> <!-- tasks-wrapper -->
+
+    </div> <!-- page-content -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Reminders section -->
+    <div class="right-bar">
+      <div class="top-part"></div> <!-- top-part is white space/ spacing above Reminders section -->
+      <div class="header">Reminders</div>
+      <div class="right-content">
+        {% if reminders %}
+          <ul class="reminder-list">
+            {% for reminder in reminders %}
+              <li class="reminder-item {{ reminder.priority|lower }}-priority">
+                <h3>{{ reminder.title }}</h3>
+                
+                <div class="reminder-meta">
+                  <p><strong>Tank:</strong> {{ reminder.tank_name }}</p>
+                  <p><strong>Due:</strong> {{ reminder.due_date }}</p>
+                  <p><strong>Priority:</strong> {{ reminder.priority }}</p>
+                  <p><strong>Category:</strong> {{ reminder.category }}</p>
+                  <p><strong>Assigned:</strong> {{ reminder.assigned_to }}</p>
+                  <p>{{ reminder.recurrence_type }}</p>
+                </div>
+                
+                <div class="reminder-description">
+                  <p>{{ reminder.description }}</p>
+                </div>
+                
+                <span class="status-badge {{ reminder.status|lower }}">{{ reminder.status }}</span>
+                
+                <form action="{{ url_for('delete_reminder') }}" method="POST" class="delete-form">
+                  <input type="hidden" name="reminder_id" value="{{ reminder.reminder_id }}">
+                  <button type="submit" class="delete-btn" title="Delete reminder"></button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="empty-reminders">
+            <p>No reminders yet.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+
+
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize all UI functionality
+  initializeUI();
+});
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Get the toggle button and the content div
+  const toggleButton = document.getElementById('toggle-tanks');
+  const tankContent = document.getElementById('tanks-content');
+  
+  // Set initial state (hidden)
+  tankContent.style.display = 'none';
+  
+  // Add click event listener to the toggle button
+  toggleButton.addEventListener('click', function() {
+    // Toggle visibility of the tank form
+    if (tankContent.style.display === 'none') {
+      tankContent.style.display = 'block';
+      toggleButton.querySelector('.button-icon').textContent = '-';
+    } else {
+      tankContent.style.display = 'none';
+      toggleButton.querySelector('.button-icon').textContent = '+';
+    }
+  });
+});
+
+
+
+
+/**
+ * Initialize all UI components and event handlers
+ */
+function initializeUI() {
+  // Set up core functionality
+  setupNavFiltering();
+  setupTabSwitching();
+  setupFishSelection();
+  setupTankEditing();
+  setupModalBehavior();
+  
+  // Initialize with the currently checked filter
+  const checkedNav = document.querySelector('.nav-item:checked');
+  if (checkedNav) {
+    filterTasks(checkedNav.id);
+  }
+}
+
+
+/**
+ * Sets up navigation filtering functionality
+ */
+function setupNavFiltering() {
+  const navItems = document.querySelectorAll('.nav-item');
+  
+  navItems.forEach(item => {
+    item.addEventListener('change', function() {
+      filterTasks(this.id);
+    });
+  });
+}
+
+/**
+ * Filter tasks based on selected category
+ * @param {string} optionId - The ID of the selected navigation option
+ */
+function filterTasks(optionId) {
+  const tasks = document.querySelectorAll('.task');
+  const upcomingHeader = document.querySelector('.header.upcoming');
+  const category = getCategoryFromOption(optionId);
+  let foundBeforeUpcoming = false;
+  let foundAfterUpcoming = false;
+  let passedUpcoming = false;
+
+  tasks.forEach(task => {
+    const taskCategories = task.getAttribute('data-category').split(' ');
+    const isVisible = category === 'all' || taskCategories.includes(category);
+
+    if (upcomingHeader && task.previousElementSibling === upcomingHeader) {
+      passedUpcoming = true;
+    }
+
+    if (isVisible) {
+      if (!passedUpcoming) {
+        foundBeforeUpcoming = true;
+      } else {
+        foundAfterUpcoming = true;
+      }
+    }
+
+    animateElement(task, isVisible);
+  });
+
+  // Handle visibility of associated elements
+  handleElementVisibility({
+    upcomingHeader,
+    hasVisibleTasks: Array.from(tasks).some(task => task.style.display !== 'none'),
+    category
+  });
+}
+
+/**
+ * Handle visibility of related UI elements after filtering
+ * @param {Object} params - Parameters for visibility handling
+ */
+function handleElementVisibility({ upcomingHeader, hasVisibleTasks, category }) {
+  // Handle upcoming header visibility
+  if (upcomingHeader) {
+    upcomingHeader.style.display = (foundBeforeUpcoming && foundAfterUpcoming) ? 'block' : 'none';
+  }
+  
+  // Handle empty state message
+  const emptyMessage = document.querySelector('.empty-message') || createEmptyMessage();
+  emptyMessage.style.display = hasVisibleTasks ? 'none' : 'block';
+
+  // Handle tanks image visibility
+  const tanksImg = document.getElementById('tanks-img');
+  if (tanksImg) {
+    tanksImg.style.display = category === 'tanks' ? 'block' : 'none';
+  }
+}
+
+/**
+ * Animate an element's appearance or disappearance
+ * @param {Element} element - The element to animate
+ * @param {boolean} isVisible - Whether the element should be visible
+ */
+function animateElement(element, isVisible) {
+  if (isVisible) {
+    element.style.display = 'flex';
+    setTimeout(() => {
+      element.style.opacity = '1';
+      element.style.transform = 'translateX(0)';
+    }, 10);
+  } else {
+    element.style.opacity = '0';
+    element.style.transform = 'translateX(-10px)';
+    setTimeout(() => {
+      element.style.display = 'none';
+    }, 300); // Match transition duration
+  }
+}
+
+/**
+ * Create empty state message for when no tasks are visible
+ * @returns {Element} The created message element
+ */
+function createEmptyMessage() {
+  const message = document.createElement('div');
+  message.className = 'empty-message';
+  message.textContent = 'No tasks found in this category';
+  message.style.padding = '30px 0';
+  message.style.textAlign = 'center';
+  message.style.color = 'var(--secondary-color)';
+  message.style.fontStyle = 'italic';
+  message.style.display = 'none';
+
+  const tasksWrapper = document.querySelector('.tasks-wrapper');
+  if (tasksWrapper) {
+    tasksWrapper.appendChild(message);
+  }
+
+  return message;
+}
+
+/**
+ * Get category name from option ID
+ * @param {string} optionId - The ID of the option
+ * @returns {string} The category name
+ */
+function getCategoryFromOption(optionId) {
+  const categoryMap = {
+    'opt-1': 'all',
+    'opt-2': 'my-reminder',
+    'opt-3': 'species',
+    'opt-4': 'tanks'
+  };
+  
+  return categoryMap[optionId] || 'all';
+}
+
+/**
+ * Set up tab switching functionality
+ */
+function setupTabSwitching() {
+  const tabs = document.querySelector(".wrapper");
+  const tabButton = document.querySelectorAll(".tab-button");
+  const contents = document.querySelectorAll(".content");
+  const contentWrapper = document.getElementById("content-wrapper");
+  const closeButton = document.getElementById("close-content-btn");
+  
+  if (!tabs || !contentWrapper) return;
+  
+  tabs.onclick = e => {
+    const id = e.target.dataset.id;
+    if (id) {
+      // Update tab button states
+      tabButton.forEach(btn => {
+        btn.classList.remove("active");
+        btn.classList.remove("pill");
+      });
+      e.target.classList.add("active");
+
+      // Update content visibility
+      contents.forEach(content => {
+        content.classList.remove("active");
+      });
+      const element = document.getElementById(id);
+      if (element) {
+        element.classList.add("active");
+        contentWrapper.classList.remove("closed");
+      }
+    }
+  };
+  
+  if (closeButton) {
+    closeButton.addEventListener("click", function() {
+      contentWrapper.classList.add("closed");
+      
+      // Reset tab button states
+      tabButton.forEach(btn => {
+        btn.classList.remove("active");
+        btn.classList.add("pill");
+      });
+    });
+  }
+}
+
+/**
+ * Set up fish selection functionality for all sections
+ */
+function setupFishSelection() {
+  setupFishSelectionSection('mass-sect', 'mass');
+  setupFishSelectionSection('detail-sect', 'detail');
+}
+
+/**
+ * Set up fish selection for a specific section
+ * @param {string} sectionId - The ID of the section
+ * @param {string} prefix - The prefix for form element IDs
+ */
+function setupFishSelectionSection(sectionId, prefix) {
+  const section = document.getElementById(sectionId);
+  if (!section) return;
+  
+  const selectButtons = section.querySelectorAll(`.select-fish${prefix === 'detail' ? '-detail' : ''}`);
+  const form = document.getElementById(`${prefix}-fish-form`);
+  
+  selectButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const fishDiv = this.parentElement;
+      
+      // Extract fish data
+      const fishData = {
+        specCode: fishDiv.dataset.speccode,
+        genus: fishDiv.dataset.genus,
+        species: fishDiv.dataset.species,
+        fbname: fishDiv.dataset.fbname
+      };
+      
+      // Populate form with fish data
+      updateFishFormFields(prefix, fishData);
+      
+      // Update UI
+      updateFishSelectionUI(section, fishDiv, form);
+    });
+  });
+  
+  // Form validation
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      if (!document.getElementById(`${prefix}_SpecCode`).value) {
+        e.preventDefault();
+        alert('Please select a fish from the search results first.');
+      }
+    });
+  }
+}
+
+/**
+ * Update fish form fields with selected fish data
+ * @param {string} prefix - The prefix for form element IDs
+ * @param {Object} fishData - The data of the selected fish
+ */
+function updateFishFormFields(prefix, fishData) {
+  document.getElementById(`${prefix}_selected_species`).value = `${fishData.genus} ${fishData.species}`;
+  document.getElementById(`${prefix}_fbname`).value = fishData.fbname;
+  document.getElementById(`${prefix}_SpecCode`).value = fishData.specCode;
+}
+
+/**
+ * Update the UI after fish selection
+ * @param {Element} section - The section containing fish results
+ * @param {Element} selectedFish - The selected fish element
+ * @param {Element} form - The form to scroll to
+ */
+function updateFishSelectionUI(section, selectedFish, form) {
+  // Highlight selected fish
+  section.querySelectorAll('.result').forEach(div => {
+    div.classList.remove('selected');
+  });
+  selectedFish.classList.add('selected');
+  
+  // Scroll to form
+  if (form) {
+    form.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+/**
+ * Set up modal behavior for the application
+ */
+function setupModalBehavior() {
+  // Hide all modals by default
+  const modals = document.querySelectorAll('.edit-modal');
+  modals.forEach(modal => {
+    modal.style.display = 'none';
+  });
+  
+  // Setup modal dismiss to restore tank cards
+  document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(button => {
+    button.addEventListener('click', function() {
+      const modal = this.closest('.modal');
+      if (modal) {
+        const tankId = modal.getAttribute('data-tank-id');
+        if (tankId) {
+          restoreTankCard(tankId);
+        }
+      }
+    });
+  });
+  
+  // Add event listener for the cancel button to restore tank card
+  const cancelBtn = document.querySelector('#editTankModal .btn-secondary');
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', function() {
+      const modal = document.getElementById('editTankModal');
+      const tankId = modal.getAttribute('data-tank-id');
+      if (tankId) {
+        restoreTankCard(tankId);
+      }
+    });
+  }
+}
+
+/**
+ * Handle tank card visibility states
+ */
+function toggleTankCardVisibility(tankId, show) {
+  const tankCard = document.getElementById('tank-card-' + tankId);
+  if (tankCard) {
+    if (show) {
+      tankCard.classList.remove('behind-background');
+    } else {
+      tankCard.classList.add('behind-background');
+    }
+  }
+}
+
+/**
+ * Hide tank card behind background
+ * @param {string} tankId - ID of the tank to hide
+ */
+function moveTankBehindBackground(tankId) {
+  toggleTankCardVisibility(tankId, false);
+}
+
+/**
+ * Restore tank card visibility
+ * @param {string} tankId - ID of the tank to restore
+ */
+function restoreTankCard(tankId) {
+  toggleTankCardVisibility(tankId, true);
+}
+
+/**
+ * Set up tank editing functionality
+ */
+function setupTankEditing() {
+  document.querySelectorAll('.edit-tank-btn').forEach(button => {
+    button.addEventListener('click', function(event) {
+      const tankId = this.getAttribute('data-tank-id');
+      const tankCard = this.closest('.tank-card');
+      if (!tankCard) return;
+      
+      // Extract tank data and populate form
+      prepareTankEditForm(tankId, tankCard);
+      
+      // Handle UI transitions
+      moveTankBehindBackground(tankId);
+      positionModalOverTankCard(event, this);
+    });
+  });
+}
+
+/**
+ * Prepare the tank edit form with data from tank card
+ * @param {string} tankId - ID of the tank
+ * @param {Element} tankCard - The tank card element
+ */
+function prepareTankEditForm(tankId, tankCard) {
+  const tankName = tankCard.querySelector('h3').textContent;
+  const detailItems = extractTankDetails(tankCard);
+  
+  // Set the form action
+  const editForm = document.getElementById('editTankForm');
+  if (editForm) {
+    editForm.action = `/update_tank/${tankId}`;
+  }
+  
+  // Populate the form fields
+  populateTankForm(tankId, tankName, detailItems);
+}
+
+/**
+ * Position the edit modal over the clicked tank card for a smooth transition
+ * @param {Event} event - The click event
+ * @param {Element} button - The edit button that was clicked
+ */
+function positionModalOverTankCard(event, button) {
+  const tankId = button.getAttribute('data-tank-id');
+  const tankCard = document.getElementById('tank-card-' + tankId);
+  const modal = document.getElementById('editTankModal');
+  
+  if (!tankCard || !modal) return;
+  
+  // Get the position and dimensions of the tank card
+  const rect = tankCard.getBoundingClientRect();
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+  
+  // Initial modal setup
+  modal.style.opacity = '0';
+  modal.style.display = 'block';
+  modal.setAttribute('data-positioned', 'true');
+  modal.setAttribute('data-tank-id', tankId);
+  
+  // Position and style the modal
+  positionModalElement(modal, rect, scrollTop, scrollLeft);
+  
+  // Show the modal with Bootstrap's modal API
+  const bootstrapModal = new bootstrap.Modal(modal);
+  
+  // Add event listeners for modal transitions
+  setupModalTransitionEvents(modal, tankId);
+  
+  bootstrapModal.show();
+}
+
+/**
+ * Position the modal element over the tank card
+ * @param {Element} modal - The modal element
+ * @param {DOMRect} rect - The bounding rectangle of the tank card
+ * @param {number} scrollTop - Vertical scroll position
+ * @param {number} scrollLeft - Horizontal scroll position
+ */
+function positionModalElement(modal, rect, scrollTop, scrollLeft) {
+  const modalDialog = modal.querySelector('.modal-dialog');
+  if (modalDialog) {
+    // Set exact position and dimensions
+    modalDialog.style.position = 'absolute';
+    modalDialog.style.top = (rect.top + scrollTop) + 'px';
+    modalDialog.style.left = (rect.left + scrollLeft) + 'px';
+    modalDialog.style.width = rect.width + 'px';
+    modalDialog.style.maxWidth = 'none';
+    modalDialog.style.margin = '0';
+    
+    // Set exact dimensions for modal content
+    const modalContent = modalDialog.querySelector('.modal-content');
+    if (modalContent) {
+      modalContent.style.width = '100%';
+      modalContent.style.minHeight = rect.height + 'px';
+    }
+  }
+}
+
+/**
+ * Set up event listeners for modal transitions
+ * @param {Element} modal - The modal element
+ * @param {string} tankId - ID of the associated tank
+ */
+function setupModalTransitionEvents(modal, tankId) {
+  // Add an event listener for when the modal is shown
+  modal.addEventListener('shown.bs.modal', function showHandler() {
+    // Ensure we can actually see the modal
+    modal.style.opacity = '1';
+    
+    // Remove the position styling to allow the modal to center properly
+    resetModalPositioning(modal);
+    
+    // Remove this event listener after it's executed
+    modal.removeEventListener('shown.bs.modal', showHandler);
+  });
+  
+  // Add event listener for when the modal is hidden
+  modal.addEventListener('hidden.bs.modal', function hideHandler() {
+    // Restore the tank card visibility when the modal is closed
+    restoreTankCard(tankId);
+    
+    // Remove this event listener after it's executed
+    modal.removeEventListener('hidden.bs.modal', hideHandler);
+  });
+}
+
+/**
+ * Reset modal positioning to Bootstrap defaults
+ * @param {Element} modal - The modal element
+ */
+function resetModalPositioning(modal) {
+  setTimeout(() => {
+    const modalDialog = modal.querySelector('.modal-dialog');
+    if (modalDialog) {
+      // Animate to center position (let Bootstrap handle this)
+      modalDialog.style.position = '';
+      modalDialog.style.top = '';
+      modalDialog.style.left = '';
+      modalDialog.style.width = '';
+      modalDialog.style.maxWidth = '';
+      modalDialog.style.margin = '';
+      
+      const modalContent = modalDialog.querySelector('.modal-content');
+      if (modalContent) {
+        modalContent.style.minHeight = '';
+      }
+    }
+    
+    modal.setAttribute('data-positioned', 'false');
+  }, 10); // Small delay to allow the DOM to update
+}
+
+/**
+ * Extract tank details from a tank card
+ * @param {Element} tankCard - The tank card element
+ * @returns {Object} The extracted tank details
+ */
+function extractTankDetails(tankCard) {
+  const detailItems = {};
+  tankCard.querySelectorAll('.tank-details li').forEach(li => {
+    const text = li.textContent;
+    const colonIndex = text.indexOf(':');
+    if (colonIndex !== -1) {
+      const key = text.substring(0, colonIndex).trim().replace(':', '').toLowerCase().replace(/\s+/g, '_');
+      const value = text.substring(colonIndex + 1).trim();
+      detailItems[key] = value;
+    }
+  });
+  return detailItems;
+}
+
+/**
+ * Populate tank edit form with tank details
+ * @param {string} tankId - The ID of the tank
+ * @param {string} tankName - The name of the tank
+ * @param {Object} detailItems - The tank details
+ */
+function populateTankForm(tankId, tankName, detailItems) {
+  const formFields = [
+    { id: 'edit_tank_id', value: tankId },
+    { id: 'edit_tank_name', value: tankName },
+    { id: 'edit_fish_amount', value: detailItems['fish_amount'] || '' },
+    { id: 'edit_water_type', value: detailItems['water_type'] || 'Freshwater' },
+    { id: 'edit_water_amount_litre', value: detailItems['water_amount_(l)'] || '' },
+    { id: 'edit_tank_volume', value: detailItems['tank_volume'] || '' },
+    { id: 'edit_filter_type', value: detailItems['filter_type'] || '' },
+    { id: 'edit_heater', value: detailItems['heater'] || '' },
+    { id: 'edit_temp_c', value: detailItems['temperature_(°c)'] || '' },
+    { id: 'edit_last_cleaned', value: formatDateForInput(detailItems['last_cleaned']) || '' },
+    { id: 'edit_cleaning_frequency_days', value: detailItems['cleaning_frequency_(days)'] || '' },
+    { id: 'edit_lighting', value: detailItems['lighting'] || '' },
+    { id: 'edit_location', value: detailItems['location'] || '' }
+  ];
+  
+  formFields.forEach(field => {
+    const element = document.getElementById(field.id);
+    if (element) {
+      element.value = field.value;
+    }
+  });
+}
+
+/**
+ * Format a date string for an input field
+ * @param {string} dateString - The date string to format
+ * @returns {string} The formatted date string
+ */
+function formatDateForInput(dateString) {
+  if (!dateString) return '';
+  
+  // Try to parse the date string
+  const dateParts = dateString.split(/[\/\-\.]/);
+  if (dateParts.length !== 3) return '';
+  
+  let year, month, day;
+  
+  // Determine date format and extract components
+  if (dateParts[0].length === 4) {
+    // Format: YYYY-MM-DD
+    year = dateParts[0];
+    month = dateParts[1].padStart(2, '0');
+    day = dateParts[2].padStart(2, '0');
+  } else {
+    // Format: MM/DD/YYYY or DD/MM/YYYY
+    // For simplicity, assume MM/DD/YYYY
+    month = dateParts[0].padStart(2, '0');
+    day = dateParts[1].padStart(2, '0');
+    year = dateParts[2].length === 2 ? `20${dateParts[2]}` : dateParts[2];
+  }
+  
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Toggle form visibility
+ * @param {string} formId - ID of the form to toggle
+ */
+function toggleForm(formId) {
+  var form = document.getElementById(formId);
+  if (form) {
+    form.style.display = form.style.display === "none" ? "block" : "none";
+  }
+}
+
+// For backwards compatibility with existing code
+function toggleReminderForm() {
+  toggleForm("reminderForm");
+}
+</script>
+
+
+
+
+
+
+</body>
+
+</html>
