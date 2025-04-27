@@ -760,11 +760,7 @@ transform: translatex(2px);
 /*Edit tanks // tank modal // Edit tanks  // tank modal // EDIT TANK INFO */
 
    /* Add this style to handle the z-index and transition */
-   .tank-card {
-    position: relative;
-    z-index: 1;
-    transition: all 0.3s ease;
-  }
+  
   
   .behind-background {
     z-index: -1;
@@ -773,29 +769,7 @@ transform: translatex(2px);
     pointer-events: none;
   }
 
-  .hidden-modal {
-    display: none;
-    z-index: -1;
-  }
 
-  #editTankModal.modal {
-    display: block;
-    padding-right: 0 !important;
-  }
-  
-  #editTankModal.modal.fade .modal-dialog {
-    transform: none;
-    transition: opacity 0.3s ease;
-  }
-  
-  #editTankModal.modal.fade {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  #editTankModal.modal.show {
-    opacity: 1;
-  }
 
   /* Modal styling to match tank card */
 #editTankModal .modal-content {

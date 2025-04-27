@@ -56,7 +56,7 @@
         <div class="task" data-category="all my-reminder">
          
         <div class="label-reminder">
-          <button class="dropdown-button" onclick="toggleForm()">Create a Reminder</button>
+          <button class="dropdown-button" onclick="toggleReminderForm()">Create a Reminder</button>
           </div>
         <!-- Add data-category attributes to each task -->
        <div>
@@ -602,7 +602,7 @@
     <!-- edit tank modal  //// modal-->
 
   </div> <!-- tanks-info -->
-</div> <!-- task -->
+</div> <!-- task     all tanks-->
 
 
 
@@ -728,8 +728,8 @@ function initializeUI() {
   setupNavFiltering();
   setupTabSwitching();
   setupFishSelection();
-  setupTankEditing();
-  setupModalBehavior();
+ // setupTankEditing();
+ // setupModalBehavior();
   
   // Initialize with the currently checked filter
   const checkedNav = document.querySelector('.nav-item:checked');
@@ -1068,6 +1068,7 @@ function restoreTankCard(tankId) {
 /**
  * Set up tank editing functionality
  */
+/*
 function setupTankEditing() {
   document.querySelectorAll('.edit-tank-btn').forEach(button => {
     button.addEventListener('click', function(event) {
@@ -1084,238 +1085,156 @@ function setupTankEditing() {
     });
   });
 }
+  */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
- * Prepare the tank edit form with data from tank card
- * @param {string} tankId - ID of the tank
- * @param {Element} tankCard - The tank card element
+ * Handle tank card visibility states
  */
-function prepareTankEditForm(tankId, tankCard) {
-  const tankName = tankCard.querySelector('h3').textContent;
-  const detailItems = extractTankDetails(tankCard);
-  
-  // Set the form action
-  const editForm = document.getElementById('editTankForm');
-  if (editForm) {
-    editForm.action = `/update_tank/${tankId}`;
-  }
-  
-  // Populate the form fields
-  populateTankForm(tankId, tankName, detailItems);
-}
-
-/**
- * Position the edit modal over the clicked tank card for a smooth transition
- * @param {Event} event - The click event
- * @param {Element} button - The edit button that was clicked
- */
-function positionModalOverTankCard(event, button) {
-  const tankId = button.getAttribute('data-tank-id');
+ function toggleTankCardVisibility(tankId, show) {
   const tankCard = document.getElementById('tank-card-' + tankId);
-  const modal = document.getElementById('editTankModal');
-  
-  if (!tankCard || !modal) return;
-  
-  // Get the position and dimensions of the tank card
-  const rect = tankCard.getBoundingClientRect();
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-  const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-  
-  // Initial modal setup
-  modal.style.opacity = '0';
-  modal.style.display = 'block';
-  modal.setAttribute('data-positioned', 'true');
-  modal.setAttribute('data-tank-id', tankId);
-  
-  // Position and style the modal
-  positionModalElement(modal, rect, scrollTop, scrollLeft);
-  
-  // Show the modal with Bootstrap's modal API
-  const bootstrapModal = new bootstrap.Modal(modal);
-  
-  // Add event listeners for modal transitions
-  setupModalTransitionEvents(modal, tankId);
-  
-  bootstrapModal.show();
-}
-
-/**
- * Position the modal element over the tank card
- * @param {Element} modal - The modal element
- * @param {DOMRect} rect - The bounding rectangle of the tank card
- * @param {number} scrollTop - Vertical scroll position
- * @param {number} scrollLeft - Horizontal scroll position
- */
-function positionModalElement(modal, rect, scrollTop, scrollLeft) {
-  const modalDialog = modal.querySelector('.modal-dialog');
-  if (modalDialog) {
-    // Set exact position and dimensions
-    modalDialog.style.position = 'absolute';
-    modalDialog.style.top = (rect.top + scrollTop) + 'px';
-    modalDialog.style.left = (rect.left + scrollLeft) + 'px';
-    modalDialog.style.width = rect.width + 'px';
-    modalDialog.style.maxWidth = 'none';
-    modalDialog.style.margin = '0';
-    
-    // Set exact dimensions for modal content
-    const modalContent = modalDialog.querySelector('.modal-content');
-    if (modalContent) {
-      modalContent.style.width = '100%';
-      modalContent.style.minHeight = rect.height + 'px';
+  if (tankCard) {
+    if (show) {
+      tankCard.classList.remove('behind-background');
+    } else {
+      tankCard.classList.add('behind-background');
     }
   }
 }
 
 /**
- * Set up event listeners for modal transitions
- * @param {Element} modal - The modal element
- * @param {string} tankId - ID of the associated tank
+ * Hide tank card behind background and show the edit modal
+ * @param {Event} event - The click event
+ * @param {HTMLElement} button - The button element that was clicked
  */
-function setupModalTransitionEvents(modal, tankId) {
-  // Add an event listener for when the modal is shown
-  modal.addEventListener('shown.bs.modal', function showHandler() {
-    // Ensure we can actually see the modal
-    modal.style.opacity = '1';
-    
-    // Remove the position styling to allow the modal to center properly
-    resetModalPositioning(modal);
-    
-    // Remove this event listener after it's executed
-    modal.removeEventListener('shown.bs.modal', showHandler);
-  });
+function moveTankBehindBackground(event, button) {
+  // Prevent default button behavior
+  event.preventDefault();
   
-  // Add event listener for when the modal is hidden
-  modal.addEventListener('hidden.bs.modal', function hideHandler() {
-    // Restore the tank card visibility when the modal is closed
-    restoreTankCard(tankId);
-    
-    // Remove this event listener after it's executed
-    modal.removeEventListener('hidden.bs.modal', hideHandler);
-  });
+  // Get the tank ID from the button's data attribute
+  const tankId = button.getAttribute('data-tank-id');
+  
+  // Hide the tank card
+  toggleTankCardVisibility(tankId, false);
+  
+  // Set the tank ID in the edit form
+  document.getElementById('edit_tank_id').value = tankId;
+  
+  
+  // Fetch and populate the form with the tank's current data
+  fetchTankDataAndPopulateForm(tankId);
 }
 
+
 /**
- * Reset modal positioning to Bootstrap defaults
- * @param {Element} modal - The modal element
+ * Fetch tank data and populate the edit form
+ * @param {string} tankId - ID of the tank to edit
  */
-function resetModalPositioning(modal) {
-  setTimeout(() => {
-    const modalDialog = modal.querySelector('.modal-dialog');
-    if (modalDialog) {
-      // Animate to center position (let Bootstrap handle this)
-      modalDialog.style.position = '';
-      modalDialog.style.top = '';
-      modalDialog.style.left = '';
-      modalDialog.style.width = '';
-      modalDialog.style.maxWidth = '';
-      modalDialog.style.margin = '';
+ function fetchTankDataAndPopulateForm(tankId) {
+  // You would implement an AJAX call to fetch the tank data
+  // For example using fetch API:
+  fetch(`/get_tank_data/${tankId}`)
+    .then(response => response.json())
+    .then(tankData => {
+      // Populate form fields with tank data
+      document.getElementById('edit_tank_name').value = tankData.tank_name;
+      document.getElementById('edit_fish_amount').value = tankData.fish_amount;
+      document.getElementById('edit_water_type').value = tankData.water_type;
+      document.getElementById('edit_water_amount_litre').value = tankData.water_amount_litre;
+      document.getElementById('edit_tank_volume').value = tankData.tank_volume;
+      document.getElementById('edit_filter_type').value = tankData.filter_type;
+      document.getElementById('edit_heater').value = tankData.heater;
+      document.getElementById('edit_temp_c').value = tankData.temp_c;
+      document.getElementById('edit_last_cleaned').value = formatDateForInput(tankData.last_cleaned);
+      document.getElementById('edit_cleaning_frequency_days').value = tankData.cleaning_frequency_days;
+      document.getElementById('edit_lighting').value = tankData.lighting;
+      document.getElementById('edit_location').value = tankData.location;
       
-      const modalContent = modalDialog.querySelector('.modal-content');
-      if (modalContent) {
-        modalContent.style.minHeight = '';
-      }
-    }
-    
-    modal.setAttribute('data-positioned', 'false');
-  }, 10); // Small delay to allow the DOM to update
+      // Update form action
+      document.getElementById('editTankForm').action = `/update_tank/${tankId}`;
+    })
+    .catch(error => {
+      console.error('Error fetching tank data:', error);
+      alert('Failed to load tank data. Please try again.');
+    });
 }
 
-/**
- * Extract tank details from a tank card
- * @param {Element} tankCard - The tank card element
- * @returns {Object} The extracted tank details
- */
-function extractTankDetails(tankCard) {
-  const detailItems = {};
-  tankCard.querySelectorAll('.tank-details li').forEach(li => {
-    const text = li.textContent;
-    const colonIndex = text.indexOf(':');
-    if (colonIndex !== -1) {
-      const key = text.substring(0, colonIndex).trim().replace(':', '').toLowerCase().replace(/\s+/g, '_');
-      const value = text.substring(colonIndex + 1).trim();
-      detailItems[key] = value;
-    }
-  });
-  return detailItems;
-}
 
 /**
- * Populate tank edit form with tank details
- * @param {string} tankId - The ID of the tank
- * @param {string} tankName - The name of the tank
- * @param {Object} detailItems - The tank details
+ * Format a date string for datetime-local input
+ * @param {string} dateString - Date string to format
+ * @return {string} Formatted date string for input
  */
-function populateTankForm(tankId, tankName, detailItems) {
-  const formFields = [
-    { id: 'edit_tank_id', value: tankId },
-    { id: 'edit_tank_name', value: tankName },
-    { id: 'edit_fish_amount', value: detailItems['fish_amount'] || '' },
-    { id: 'edit_water_type', value: detailItems['water_type'] || 'Freshwater' },
-    { id: 'edit_water_amount_litre', value: detailItems['water_amount_(l)'] || '' },
-    { id: 'edit_tank_volume', value: detailItems['tank_volume'] || '' },
-    { id: 'edit_filter_type', value: detailItems['filter_type'] || '' },
-    { id: 'edit_heater', value: detailItems['heater'] || '' },
-    { id: 'edit_temp_c', value: detailItems['temperature_(°c)'] || '' },
-    { id: 'edit_last_cleaned', value: formatDateForInput(detailItems['last_cleaned']) || '' },
-    { id: 'edit_cleaning_frequency_days', value: detailItems['cleaning_frequency_(days)'] || '' },
-    { id: 'edit_lighting', value: detailItems['lighting'] || '' },
-    { id: 'edit_location', value: detailItems['location'] || '' }
-  ];
-  
-  formFields.forEach(field => {
-    const element = document.getElementById(field.id);
-    if (element) {
-      element.value = field.value;
-    }
-  });
-}
-
-/**
- * Format a date string for an input field
- * @param {string} dateString - The date string to format
- * @returns {string} The formatted date string
- */
-function formatDateForInput(dateString) {
+ function formatDateForInput(dateString) {
   if (!dateString) return '';
   
-  // Try to parse the date string
-  const dateParts = dateString.split(/[\/\-\.]/);
-  if (dateParts.length !== 3) return '';
+  const date = new Date(dateString);
   
-  let year, month, day;
+  // Check if date is valid
+  if (isNaN(date.getTime())) return '';
   
-  // Determine date format and extract components
-  if (dateParts[0].length === 4) {
-    // Format: YYYY-MM-DD
-    year = dateParts[0];
-    month = dateParts[1].padStart(2, '0');
-    day = dateParts[2].padStart(2, '0');
-  } else {
-    // Format: MM/DD/YYYY or DD/MM/YYYY
-    // For simplicity, assume MM/DD/YYYY
-    month = dateParts[0].padStart(2, '0');
-    day = dateParts[1].padStart(2, '0');
-    year = dateParts[2].length === 2 ? `20${dateParts[2]}` : dateParts[2];
-  }
-  
-  return `${year}-${month}-${day}`;
+  // Format: YYYY-MM-DDThh:mm
+  return date.toISOString().slice(0, 16);
 }
 
-/**
- * Toggle form visibility
- * @param {string} formId - ID of the form to toggle
- */
-function toggleForm(formId) {
-  var form = document.getElementById(formId);
-  if (form) {
-    form.style.display = form.style.display === "none" ? "block" : "none";
-  }
-}
 
-// For backwards compatibility with existing code
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function toggleReminderForm() {
-  toggleForm("reminderForm");
+  const reminderForm = document.getElementById("reminderForm");
+  if (reminderForm.style.display === "none") {
+    reminderForm.style.display = "block";
+  } else {
+    reminderForm.style.display = "none";
+  }
 }
+
+
+
 </script>
 
 
