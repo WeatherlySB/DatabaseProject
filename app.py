@@ -78,16 +78,24 @@ def index():
         elif request.form.get('action') == 'clear':
             results = []
             searched = False
-   
-    # Fetch reminders with tank names
+    
+    # Fetch reminders with all related tanks
     with db.cursor(dictionary=True) as cursor:
         cursor.execute("""
-            SELECT r.reminder_id, r.tank_id, r.title, r.description, r.due_date, r.recurrence_type,
-                r.priority, r.category, r.status, r.assigned_to, t.tank_name
+            SELECT r.reminder_id, r.title, r.description, r.due_date, r.recurrence_type,
+                r.priority, r.category, r.status,
+                GROUP_CONCAT(t.tank_name SEPARATOR ', ') AS tank_names
             FROM reminders r
-            JOIN tanks t ON r.tank_id = t.tank_id
+            LEFT JOIN reminder_tanks rt ON r.reminder_id = rt.reminder_id
+            LEFT JOIN tanks t ON rt.tank_id = t.tank_id
+            GROUP BY r.reminder_id
         """)
         reminders = cursor.fetchall()
+
+    # Add calendar display formatting
+    for r in reminders:
+        r['start'] = r['due_date']
+        r['title'] = f"{r['title']} ({r['tank_names']})"
    
     return render_template('index.html',
                            results=results,
@@ -218,7 +226,7 @@ def delete_tank(tank_id):
     return redirect('/')
 
 
-# kinda works
+
 @app.route('/get_tank_data/<int:tank_id>', methods=['GET'])
 def get_tank_data(tank_id):
     cursor = db.cursor(dictionary=True)
@@ -277,7 +285,10 @@ def update_tank(tank_id):
 @app.route('/add_reminder', methods=['POST'])
 def add_reminder():
     cursor = db.cursor()
-    tank_id = request.form['tank_id']
+    
+    # Get tanks as a list (multiple selection)
+    tank_ids = request.form.getlist('tank_ids')
+    
     title = request.form['title']
     description = request.form.get('description', '')
     due_date = request.form['due_date']
@@ -287,29 +298,30 @@ def add_reminder():
     category = request.form['category']
     status = request.form['status']
     notification_time = request.form.get('notification_time', 0)
-    assigned_to = request.form.get('assigned_to', None)
     
-    completed_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-    # Convert empty fields to None
-    if not recurrence_interval:
-        recurrence_interval = None
-    if not assigned_to:
-        assigned_to = None
-
-    # SQL Query to insert data
+    
+    
+    # Insert the reminder without tank_id
     query = """
-    INSERT INTO reminders (tank_id, title, description, completed_date, due_date, recurrence_type, 
-    recurrence_interval, priority, category, status, notification_time, assigned_to) 
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    INSERT INTO reminders (title, description, due_date, recurrence_type, 
+    recurrence_interval, priority, category, status, notification_time) 
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
-    values = (tank_id, title, description, completed_date, due_date, recurrence_type, recurrence_interval, 
-              priority, category, status, notification_time, assigned_to)
+    values = (
+        title, description, due_date, recurrence_type, recurrence_interval,
+        priority, category, status, notification_time
+    )
     
     cursor.execute(query, values)
-    db.commit()
+    reminder_id = cursor.lastrowid  # Get the auto-incremented ID of the inserted reminder
+    
+    # Link reminder to selected tanks
+    for tank_id in tank_ids:
+        cursor.execute("INSERT INTO reminder_tanks (reminder_id, tank_id) VALUES (%s, %s)", (reminder_id, tank_id))
 
-    return redirect(url_for('index'))  # Redirect to home page
+    
+    db.commit()
+    return redirect(url_for('index'))
 
 
 
