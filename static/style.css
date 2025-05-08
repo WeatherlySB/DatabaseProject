@@ -82,40 +82,40 @@ justify-content: space-between;
 
 
 /* Reminder section // Reminder section //  Reminder section //  Reminder section  */
-
-.calendar-container {
+.calendar-container, .reminder-container {
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-weight: 300;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
   overflow: hidden;
- font-family: 'HelveticaNeue-UltraLight', 'Helvetica Neue UltraLight', 'Helvetica Neue', Arial, Helvetica, sans-serif;
- font-weight: 100;
- color: rgba(255, 255, 255, 1);
- margin: 0;
- padding: 0;
- background: #4A4A4A;
- -webkit-touch-callout: none;
- -webkit-user-select: none;
- -khtml-user-select: none;
- -moz-user-select: none;
- -ms-user-select: none;
- user-select: none;
 }
 
+/* Calendar Core Styles */
 #calendar {
-  -webkit-transform: translate3d(0, 0, 0);
-  -moz-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
   width: 420px;
   margin: 0 auto;
   height: 570px;
   overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .calendar-container .header {
   height: 50px;
   width: 420px;
-  background: rgba(66, 66, 66, 1);
+  background: rgba(112, 126, 245, 1); /* Matching the button color */
   text-align: center;
-  position:relative;
+  position: relative;
   z-index: 100;
+  border-radius: 8px 8px 0 0;
 }
 
 .calendar-container .header h1 {
@@ -123,8 +123,9 @@ justify-content: space-between;
   padding: 0;
   font-size: 20px;
   line-height: 50px;
-  font-weight: 100;
+  font-weight: 400;
   letter-spacing: 1px;
+  color: #fff;
 }
 
 .left, .right {
@@ -139,56 +140,47 @@ justify-content: space-between;
 
 .left {
   border-width: 7.5px 10px 7.5px 0;
-  border-color: transparent rgba(160, 159, 160, 1) transparent transparent;
+  border-color: transparent #ffffff transparent transparent;
   left: 20px;
 }
 
 .right {
   border-width: 7.5px 0 7.5px 10px;
-  border-color: transparent transparent transparent rgba(160, 159, 160, 1);
+  border-color: transparent transparent transparent #ffffff;
   right: 20px;
 }
 
 .month {
-  /*overflow: hidden;*/
   opacity: 0;
 }
 
 .month.new {
-  -webkit-animation: fadeIn 1s ease-out;
+  animation: fadeIn 1s ease-out;
   opacity: 1;
 }
 
 .month.in.next {
-  -webkit-animation: moveFromTopFadeMonth .4s ease-out;
-  -moz-animation: moveFromTopFadeMonth .4s ease-out;
   animation: moveFromTopFadeMonth .4s ease-out;
   opacity: 1;
 }
 
 .month.out.next {
-  -webkit-animation: moveToTopFadeMonth .4s ease-in;
-  -moz-animation: moveToTopFadeMonth .4s ease-in;
   animation: moveToTopFadeMonth .4s ease-in;
   opacity: 1;
 }
 
 .month.in.prev {
-  -webkit-animation: moveFromBottomFadeMonth .4s ease-out;
-  -moz-animation: moveFromBottomFadeMonth .4s ease-out;
   animation: moveFromBottomFadeMonth .4s ease-out;
   opacity: 1;
 }
 
 .month.out.prev {
-  -webkit-animation: moveToBottomFadeMonth .4s ease-in;
-  -moz-animation: moveToBottomFadeMonth .4s ease-in;
   animation: moveToBottomFadeMonth .4s ease-in;
   opacity: 1;
 }
 
 .week {
- background: #4A4A4A;
+  background: #ffffff;
 }
 
 .day {
@@ -198,24 +190,25 @@ justify-content: space-between;
   text-align: center;
   vertical-align: top;
   cursor: pointer;
-  background: #4A4A4A;
+  background: #ffffff;
   position: relative;
   z-index: 100;
+  color: #333;
 }
 
 .day.other {
- color: rgba(255, 255, 255, .3);
+  color: rgba(112, 126, 245, 0.3);
 }
 
 .day.today {
-  color: rgba(156, 202, 235, 1);
+  color: #707ef5; /* Matching the button color */
 }
 
 .day-name {
   font-size: 9px;
   text-transform: uppercase;
   margin-bottom: 5px;
-  color: rgba(255, 255, 255, .5);
+  color: rgba(0, 0, 0, 0.5);
   letter-spacing: .7px;
 }
 
@@ -223,7 +216,6 @@ justify-content: space-between;
   font-size: 24px;
   letter-spacing: 1.5px;
 }
-
 
 .day .day-events {
   list-style: none;
@@ -243,9 +235,11 @@ justify-content: space-between;
   height: 5px;
   line-height: 5px;
   margin: 0 1px;
+  border-radius: 50%;
 }
 
-.blue { background: rgba(156, 202, 235, 1); }
+/* Calendar Event Colors */
+.blue { background: #707ef5; } /* Matching primary button color */
 .orange { background: rgba(247, 167, 0, 1); }
 .green { background: rgba(153, 198, 109, 1); }
 .yellow { background: rgba(249, 233, 0, 1); }
@@ -254,20 +248,17 @@ justify-content: space-between;
   position: relative;
   width: 420px;
   height: 75px;
-  background: rgba(164, 164, 164, 1);
+  background: #f9f9f9; /* Matching form background */
   margin-top: 5px;
   border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .details.in {
-  -webkit-animation: moveFromTopFade .5s ease both;
-  -moz-animation: moveFromTopFade .5s ease both;
   animation: moveFromTopFade .5s ease both;
 }
 
 .details.out {
-  -webkit-animation: moveToTopFade .5s ease both;
-  -moz-animation: moveToTopFade .5s ease both;
   animation: moveToTopFade .5s ease both;
 }
 
@@ -280,7 +271,7 @@ justify-content: space-between;
   height: 0px;
   border-style: solid;
   border-width: 0 5px 5px 5px;
-  border-color: transparent transparent rgba(164, 164, 164, 1) transparent;
+  border-color: transparent transparent #f9f9f9 transparent;
   transition: all 0.7s ease;
 }
 
@@ -292,26 +283,18 @@ justify-content: space-between;
 }
 
 .events.in {
-  -webkit-animation: fadeIn .3s ease both;
-  -moz-animation: fadeIn .3s ease both;
   animation: fadeIn .3s ease both;
 }
 
 .events.in {
-  -webkit-animation-delay: .3s;
-  -moz-animation-delay: .3s;
   animation-delay: .3s;
 }
 
 .details.out .events {
-  -webkit-animation: fadeOutShrink .4s ease both;
-  -moz-animation: fadeOutShink .4s ease both;
-  animation: fadeOutShink .4s ease both;
+  animation: fadeOutShrink .4s ease both;
 }
 
 .events.out {
-  -webkit-animation: fadeOut .3s ease both;
-  -moz-animation: fadeOut .3s ease both;
   animation: fadeOut .3s ease both;
 }
 
@@ -324,7 +307,7 @@ justify-content: space-between;
 }
 
 .event.empty {
-  color: #eee;
+  color: #ccc;
 }
 
 .event-category {
@@ -333,6 +316,7 @@ justify-content: space-between;
   display: inline-block;
   margin: 6px 0 0;
   vertical-align: top;
+  border-radius: 50%;
 }
 
 .event span {
@@ -340,131 +324,59 @@ justify-content: space-between;
   padding: 0 0 0 7px;
 }
 
-.legend {
-  position: absolute;
-  bottom: 0;
+
+/* Reminder Form Styles */
+.label-reminder {
+  margin-bottom: 1em;
+}
+
+#reminderForm {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+}
+
+#reminderForm label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
+  color: #333;
+}
+
+#reminderForm input,
+#reminderForm textarea,
+#reminderForm select {
   width: 100%;
-  height: 30px;
-  background: rgba(60, 60, 60, 1);
-  line-height: 30px;
-
+  padding: 8px;
+  margin-top: 4px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
-.entry {
-  position: relative;
-  padding: 0 0 0 25px;
-  font-size: 13px;
-  display: inline-block;
-  line-height: 30px;
-  background: transparent;
+#reminderForm button {
+  margin-top: 15px;
+  background-color: #707ef5;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
-.entry:after {
-  position: absolute;
-  content: '';
-  height: 5px;
-  width: 5px;
-  top: 12px;
-  left: 14px;
+#reminderForm button:hover {
+  background-color: #5a68d5;
 }
 
-.entry.blue:after { background: rgba(156, 202, 235, 1); }
-.entry.orange:after { background: rgba(247, 167, 0, 1); }
-.entry.green:after { background: rgba(153, 198, 109, 1); }
-.entry.yellow:after { background: rgba(249, 233, 0, 1); }
-
-/* Animations are cool!  */
-@-webkit-keyframes moveFromTopFade {
-  from { opacity: .3; height:0px; margin-top:0px; -webkit-transform: translateY(-100%); }
+.recurrence-options {
+  margin-top: 10px;
 }
-@-moz-keyframes moveFromTopFade {
-  from { height:0px; margin-top:0px; -moz-transform: translateY(-100%); }
-}
-@keyframes moveFromTopFade {
-  from { height:0px; margin-top:0px; transform: translateY(-100%); }
-}
-
-@-webkit-keyframes moveToTopFade {
-  to { opacity: .3; height:0px; margin-top:0px; opacity: 0.3; -webkit-transform: translateY(-100%); }
-}
-@-moz-keyframes moveToTopFade {
-  to { height:0px; -moz-transform: translateY(-100%); }
-}
-@keyframes moveToTopFade {
-  to { height:0px; transform: translateY(-100%); }
-}
-
-@-webkit-keyframes moveToTopFadeMonth {
-  to { opacity: 0; -webkit-transform: translateY(-30%) scale(.95); }
-}
-@-moz-keyframes moveToTopFadeMonth {
-  to { opacity: 0; -moz-transform: translateY(-30%); }
-}
-@keyframes moveToTopFadeMonth {
-  to { opacity: 0; -moz-transform: translateY(-30%); }
-}
-
-@-webkit-keyframes moveFromTopFadeMonth {
-  from { opacity: 0; -webkit-transform: translateY(30%) scale(.95); }
-}
-@-moz-keyframes moveFromTopFadeMonth {
-  from { opacity: 0; -moz-transform: translateY(30%); }
-}
-@keyframes moveFromTopFadeMonth {
-  from { opacity: 0; -moz-transform: translateY(30%); }
-}
-
-@-webkit-keyframes moveToBottomFadeMonth {
-  to { opacity: 0; -webkit-transform: translateY(30%) scale(.95); }
-}
-@-moz-keyframes moveToBottomFadeMonth {
-  to { opacity: 0; -webkit-transform: translateY(30%); }
-}
-@keyframes moveToBottomFadeMonth {
-  to { opacity: 0; -webkit-transform: translateY(30%); }
-}
-
-@-webkit-keyframes moveFromBottomFadeMonth {
-  from { opacity: 0; -webkit-transform: translateY(-30%) scale(.95); }
-}
-@-moz-keyframes moveFromBottomFadeMonth {
-  from { opacity: 0; -webkit-transform: translateY(-30%); }
-}
-@keyframes moveFromBottomFadeMonth {
-  from { opacity: 0; -webkit-transform: translateY(-30%); }
-}
-
-@-webkit-keyframes fadeIn  {
-  from { opacity: 0; }
-}
-@-moz-keyframes fadeIn  {
-  from { opacity: 0; }
-}
-@keyframes fadeIn  {
-  from { opacity: 0; }
-}
-
-@-webkit-keyframes fadeOut  {
-  to { opacity: 0; }
-}
-@-moz-keyframes fadeOut  {
-  to { opacity: 0; }
-}
-@keyframes fadeOut  {
-  to { opacity: 0; }
-}
-
-@-webkit-keyframes fadeOutShink  {
-  to { opacity: 0; padding: 0px; height: 0px; }
-}
-@-moz-keyframes fadeOutShink  {
-  to { opacity: 0; padding: 0px; height: 0px; }
-}
-@keyframes fadeOutShink  {
-  to { opacity: 0; padding: 0px; height: 0px; }
-}
-
-
 
 
 .wrapper-reminder {
@@ -621,6 +533,44 @@ justify-content: space-between;
   margin-top: 10px;
 }
 
+
+/* Animation Keyframes */
+@keyframes moveFromTopFade {
+  from { opacity: .3; height:0px; margin-top:0px; transform: translateY(-100%); }
+}
+
+@keyframes moveToTopFade {
+  to { opacity: .3; height:0px; margin-top:0px; opacity: 0.3; transform: translateY(-100%); }
+}
+
+@keyframes moveToTopFadeMonth {
+  to { opacity: 0; transform: translateY(-30%) scale(.95); }
+}
+
+@keyframes moveFromTopFadeMonth {
+  from { opacity: 0; transform: translateY(30%) scale(.95); }
+}
+
+@keyframes moveToBottomFadeMonth {
+  to { opacity: 0; transform: translateY(30%) scale(.95); }
+}
+
+@keyframes moveFromBottomFadeMonth {
+  from { opacity: 0; transform: translateY(-30%) scale(.95); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; }
+}
+
+@keyframes fadeOutShrink {
+  to { opacity: 0; padding: 0px; height: 0px; }
+}
+
 .hidden {
   display: none;
 }
@@ -633,11 +583,12 @@ justify-content: space-between;
   border: 2px solid #707ef5;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 500;
   color: #707ef5;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   width: 100%;
   text-align: left;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .dropdown-button:hover {

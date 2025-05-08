@@ -146,7 +146,6 @@
        
           <div class="calendar-container">
             <div id="calendar"></div>
-           
           </div>
          
         
@@ -532,11 +531,29 @@
             <div class="tank-card" id="tank-card-{{ tank.tank_id }}">
               <h3>{{ tank.tank_name }}</h3>
               <ul class="tank-details">
-                <li><strong>Water Type:</strong> {{ tank.water_type }}</li>
+                <li><strong>Water Type:</strong> 
+                  {% if tank.water_type == 0 %}
+                    Freshwater
+                  {% elif tank.water_type == 1 %}
+                    Saltwater
+                  {% elif tank.water_type == 2 %}
+                    Brackish
+                  {% else %}
+                    {{ tank.water_type }}
+                  {% endif %}
+                </li>
                 <li><strong>Water Amount (L):</strong> {{ tank.water_amount_litre }}</li>
                 <li><strong>Tank Volume:</strong> {{ tank.tank_volume }}</li>
                 <li><strong>Filter Type:</strong> {{ tank.filter_type }}</li>
-                <li><strong>Heater:</strong> {{ tank.heater }}</li>
+                <li><strong>Heater:</strong> 
+                  {% if tank.heater == 0 %}
+                  No
+                  {%elif tank.heater == 1%}
+                  Yes
+                  {% else %}
+                    {{ tank.heater }}
+                  {% endif %}
+                </li>
                 <li><strong>Temperature (°C):</strong> {{ tank.temp_c }}</li>
                 <li><strong>Last Cleaned:</strong> {{ tank.last_cleaned }}</li>
                 <li><strong>Cleaning Frequency (days):</strong> {{ tank.cleaning_frequency_days }}</li>

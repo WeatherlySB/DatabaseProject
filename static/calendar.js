@@ -23,7 +23,7 @@ this.drawHeader();
 //Draw Month
 this.drawMonth();
 
-this.drawLegend();
+//this.drawLegend();
 }
 
 Calendar.prototype.drawHeader = function() {
