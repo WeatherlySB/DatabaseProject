@@ -6,6 +6,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add New Tank</title>
   <link rel="stylesheet" href="../static/style.css">
+    <!-- Other head elements... -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js"></script>
+    
+    <!-- Make reminders data available to JavaScript -->
+    <script>
+        // This passes the reminders data from Python to JavaScript
+        var remindersData = {{ reminders_json|safe }};
+    </script>
+    
+    <!-- Include your calendar JavaScript file -->
+    <script src="../static/calendar.js" defer></script>
+    
+    <!-- Calendar CSS (add this to your CSS file or include separately) -->
+    <style>
+        /* Calendar styles - copy over your existing CSS or include from external file */
+        .calendar-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Add your other calendar styles here */
+    </style>
 </head>
 
 <body>
@@ -18,7 +40,7 @@
       <div class="upper-part">
         <div class="actions">
 
-          <div class="circle-2"></div> <!-- Upper left three dots-->
+          
         </div> <!-- actions -->
       </div> <!-- upper-part -->
     </div> <!-- left-bar -->
@@ -51,45 +73,54 @@
 
         <div class="task" data-category="my-reminder">
          
-        <div class="label-reminder">
-          <button class="dropdown-button" onclick="toggleReminderForm()">Create a Reminder</button>
-          </div> <!-- label-reminder -->
-        <!-- Add data-category attributes to each task -->
-    
-          <div id="reminderForm" class="dropdown-content" style="display: none;">
+          <div class="label-reminder">
+            <button class="dropdown-button" onclick="toggleReminderForm()">➕ Create a Reminder</button>
+          </div>
+          
+          <div id="reminderForm" class="dropdown-content dropdown-hidden">
             <form action="/add_reminder" method="POST">
               <label for="title">Title:</label>
-              <input title="title_input" type="text" name="title" required><br>
-              
+              <input title="title_input" type="text" name="title" required>
+          
               <label for="tank_id">Select Tank(s):</label>
               <select id="tank_id" name="tank_ids" multiple required>
                 {% for tank in tanks %}
                   <option value="{{ tank.tank_id }}">{{ tank.tank_name }}</option>
                 {% endfor %}
               </select>
-              
+          
               <label for="description">Description:</label>
-              <textarea title="desc_input" name="description"></textarea><br>
-              
+              <textarea title="desc_input" name="description"></textarea>
+          
               <label for="due_date">Due Date:</label>
-              <input title="datetime_input" type="datetime-local" name="due_date" required><br>
-              
+              <input title="datetime_input" type="datetime-local" name="due_date" required>
+          
+              <label for="start_date">Start Date:</label>
+              <input title="start_date_input" type="datetime-local" name="start_date">
+          
               <label for="recurrence_type">Recurrence Type:</label>
-              <select title="reminder_type_input" name="recurrence_type">
-                <option value="none">None</option>
-                <option value="daily">Daily</option>
+              <select title="reminder_type_input" name="recurrence_type" onchange="handleRecurrenceChange(this.value)">
+                <option value="none" selected>None</option>
                 <option value="weekly">Weekly</option>
-                <option value="biweekly">Biweekly</option>
                 <option value="monthly">Monthly</option>
-                <option value="custom">Custom</option>
-              </select><br>
-              
-              <label for="recurrence_interval">Custom Recurrence Interval (days):</label>
-              <input title="recurrence_input" type="number" name="recurrence_interval"><br>
-              
-              <label for="priority">Priority (1-5):</label>
-              <input title="priority_input" type="number" name="priority" min="1" max="5" required><br>
-              
+              </select>              
+          
+              <div id="weekly_options" class="recurrence-options hidden">
+                <label>Weekly Recurrence Days:</label><br>
+                <input title="recurr_mon" type="checkbox" name="recurrence_interval[]" value="Mon"> Mon
+                <input title="recurr_tue" type="checkbox" name="recurrence_interval[]" value="Tue"> Tue
+                <input title="recurr_wed" type="checkbox" name="recurrence_interval[]" value="Wed"> Wed
+                <input title="recurr_thur" type="checkbox" name="recurrence_interval[]" value="Thu"> Thu
+                <input title="recurr_fri" type="checkbox" name="recurrence_interval[]" value="Fri"> Fri
+                <input title="recurr_sat" type="checkbox" name="recurrence_interval[]" value="Sat"> Sat
+                <input title="recurr_sun" type="checkbox" name="recurrence_interval[]" value="Sun"> Sun
+              </div>
+          
+              <div id="monthly_options" class="recurrence-options hidden">
+                <label for="recurrence_monthly">Day of month:</label>
+                <input title="recurr_monthly" type="number" name="recurrence_monthly" min="1" max="31">
+              </div>
+          
               <label for="category">Category:</label>
               <select title="category_input" name="category">
                 <option value="cleaning">Cleaning</option>
@@ -99,30 +130,27 @@
                 <option value="testing">Testing</option>
                 <option value="maintenance">Maintenance</option>
                 <option value="other">Other</option>
-              </select><br>
-              
+              </select>
+          
               <label for="status">Status:</label>
               <select title="status_input" name="status">
                 <option value="pending">Pending</option>
                 <option value="completed">Completed</option>
                 <option value="snoozed">Snoozed</option>
                 <option value="cancelled">Cancelled</option>
-              </select><br>
-              
-              <label for="notification_time">Notification Time (minutes before due date):</label>
-              <input title="notif_time_input" type="number" name="notification_time"><br>
-              
+              </select>
+          
               <button type="submit">Create Reminder</button>
             </form>
-          </div> <!-- reminderForm dropdown-content -->
+          </div>
        
-
-        <span class="badge badge-priority-{{ reminders.priority }}">{{ reminders.priority }}</span>
-        <div id="calendar" style="margin-top: 30px;"></div>
-
-        <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
+          <div class="calendar-container">
+            <div id="calendar"></div>
+           
+          </div>
+         
+        
+          
         </div> <!-- my-reminders -->
         <!-- End of reminders task -->
 
@@ -186,11 +214,6 @@
         <div class="form-group">
           <label for="tank_name">Tank Name</label>
           <input title="tank_input" type="text" id="tank_name" name="tank_name" placeholder="My Reef Tank" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="fish_amount">Fish Amount</label>
-          <input title="amount_input" type="number" id="fish_amount" name="fish_amount" placeholder="5" required>
         </div>
         
         <div class="form-group">
@@ -448,10 +471,6 @@
                   <input type="text" class="form-control" id="edit_tank_name" name="tank_name" required>
                 </li>
                 <li>
-                  <strong>Fish Amount:</strong>
-                  <input type="number" class="form-control" id="edit_fish_amount" name="fish_amount">
-                </li>
-                <li>
                   <strong>Water Type:</strong>
                   <select class="form-select" id="edit_water_type" name="water_type">
                     <option value="0">Freshwater</option>
@@ -503,8 +522,8 @@
               </div>
             </form>
           </div> <!-- modal-body p-0 -->
-        </div>
-      </div>
+        </div> <!-- modal-content tank-card -->
+      </div> <!-- modal-dialog modal-lg -->
     </div> <!-- modal fade   editTankModal-->
     <!-- edit tank modal  //// modal-->
         <div class="card-body">
@@ -513,7 +532,6 @@
             <div class="tank-card" id="tank-card-{{ tank.tank_id }}">
               <h3>{{ tank.tank_name }}</h3>
               <ul class="tank-details">
-                <li><strong>Fish Amount:</strong> {{ tank.fish_amount }}</li>
                 <li><strong>Water Type:</strong> {{ tank.water_type }}</li>
                 <li><strong>Water Amount (L):</strong> {{ tank.water_amount_litre }}</li>
                 <li><strong>Tank Volume:</strong> {{ tank.tank_volume }}</li>
@@ -545,7 +563,6 @@
                   <li class="fish-data">
                     <strong>Mass Fish Entry:</strong>
                     <ul>
-                      <li>Species Code: {{ mass.SpecCode }}</li>
                       <li>Notes: {{ mass.notes_mass }}</li>
                       <li>Quantity: {{ mass.mass_quantity }}</li>
                       <li>Average Age: {{ mass.avg_age_months }} months</li>
@@ -562,7 +579,7 @@
                   <li class="fish-data">
                     <strong>{{ detail.fish_name if detail.fish_name else 'Fish Details' }}</strong>
                     <ul>
-                      <li>Species Code: {{ detail.SpecCode }}</li>
+                  
                       <li>Notes: {{ detail.notes_detail }}</li>
                       <li>Average Age: {{ detail.avg_age_months }} months</li>
                       <li>Date Added: {{ detail.date_added }}</li>
@@ -593,9 +610,10 @@
             </div> <!-- tank-card -->
             {% endfor %}
           </div> <!-- table-responsive -->
-        </div>
-      </div>
-    </div>
+        </div> <!-- card-body -->
+        
+      </div> <!-- card -->
+    </div> <!-- container mt-4 -->
     {% endif %}
 
 
@@ -612,31 +630,29 @@
 
 
 
-    <!-- Reminders section -->
+    <!-- Reminders section RIGHT SIDE -->
     <div class="right-bar">
-      <div class="top-part"></div> <!-- top-part is white space/ spacing above Reminders section -->
+      <div class="top-part"></div> <!-- spacing above Reminders section -->
       <div class="header">Reminders</div>
       <div class="right-content">
         {% if reminders %}
           <ul class="reminder-list">
             {% for reminder in reminders %}
-              <li class="reminder-item {{ reminder.priority|lower }}-priority">
+              <li class="reminder-item">
                 <h3>{{ reminder.title }}</h3>
-                
+    
                 <div class="reminder-meta">
-                  <p><strong>Tank:</strong> {{ reminder.tank_name }}</p>
                   <p><strong>Due:</strong> {{ reminder.due_date }}</p>
-                  <p><strong>Priority:</strong> {{ reminder.priority }}</p>
                   <p><strong>Category:</strong> {{ reminder.category }}</p>
                   <p>{{ reminder.recurrence_type }}</p>
                 </div>
-                
+    
                 <div class="reminder-description">
                   <p>{{ reminder.description }}</p>
                 </div>
-                
+    
                 <span class="status-badge {{ reminder.status|lower }}">{{ reminder.status }}</span>
-                
+    
                 <form action="{{ url_for('delete_reminder') }}" method="POST" class="delete-form">
                   <input type="hidden" name="reminder_id" value="{{ reminder.reminder_id }}">
                   <button type="submit" class="delete-btn" title="Delete reminder"></button>
@@ -651,6 +667,7 @@
         {% endif %}
       </div>
     </div>
+    
 
 
 
@@ -669,23 +686,6 @@
   // Setup modal functionality
   setupModalBehavior();
 
-  const calendarEl = document.getElementById('calendar');
-
-  const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-    initialView: 'dayGridMonth',
-    events: '/reminders_json'
-  });
-  calendar.render();
-
-   // Default to 'Reminders' if nothing is checked
-   const checkedNav = document.querySelector('.nav-item:checked');
-  if (!checkedNav) {
-    const remindersTab = document.getElementById('opt-2');
-    if (remindersTab) {
-      remindersTab.checked = true;
-      filterTasks('opt-2');
-    }
-  }
 });
 
 /**
@@ -1194,7 +1194,6 @@ function fetchTankDataAndPopulateForm(tankId) {
     .then(tankData => {
       // Populate form fields with tank data
       document.getElementById('edit_tank_name').value = tankData.tank_name;
-      document.getElementById('edit_fish_amount').value = tankData.fish_amount;
       document.getElementById('edit_water_type').value = tankData.water_type;
       document.getElementById('edit_water_amount_litre').value = tankData.water_amount_litre;
       document.getElementById('edit_tank_volume').value = tankData.tank_volume;
@@ -1240,17 +1239,36 @@ function formatDateForInput(dateString) {
 
 function toggleReminderForm() {
   const reminderForm = document.getElementById("reminderForm");
-  if (reminderForm.style.display === "none" || !reminderForm.style.display) {
-    reminderForm.style.display = "block";
-    reminderForm.style.maxHeight = reminderForm.scrollHeight + "px";
-  } else {
-    reminderForm.style.display = "none";
-    reminderForm.style.maxHeight = null;
+  reminderForm.classList.toggle("dropdown-hidden");
+}
+
+function handleRecurrenceChange(type) {
+  document.getElementById("weekly_options").classList.add("hidden");
+  document.getElementById("monthly_options").classList.add("hidden");
+
+  if (type === "weekly") {
+    document.getElementById("weekly_options").classList.remove("hidden");
+  } else if (type === "monthly") {
+    document.getElementById("monthly_options").classList.remove("hidden");
   }
 }
 
+document.querySelector('[name="recurrence_type"]').addEventListener('change', function() {
+  const weekly = document.getElementById('weekly_options');
+  const monthly = document.getElementById('monthly_options');
+  weekly.style.display = 'none';
+  monthly.style.display = 'none';
+
+  if (this.value === 'weekly') {
+    weekly.style.display = 'block';
+  } else if (this.value === 'monthly') {
+    monthly.style.display = 'block';
+  }
+});
+
 
 </script>
+
 
 </body>
 
